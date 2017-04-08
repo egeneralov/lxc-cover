@@ -3,13 +3,13 @@
 
 	C [ls|create|delete|start|stop|backup|restore|console] name_of_container
 
-### List
+#### List
 
 	C ls
 
 Running *lxc-ls -f* - full info about container.
 
-### Create
+#### Create
 
 	C create name
 
