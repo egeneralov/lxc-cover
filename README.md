@@ -15,31 +15,31 @@ Running *lxc-ls -f* - full info about container.
 
 Creating container name like your system.
 
-## Delete
+#### Delete
 
 	C delete name
 
 Removing container name.
 
-## Start
+#### Start
 
 	C start name
 
-## Stop
+#### Stop
 
 	C stop name
 
-## Backup
+#### Backup
 
 	C backup name
 
-## Restore
+#### Restore
 
 	C restore name
 
 Restoring your container from backup. Removing current if exist.
 
-## Console
+#### Console
 
 	C console name
 
