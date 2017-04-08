@@ -1,0 +1,96 @@
+#!/bin/bash
+# Eduard Generalov
+# JustForFun - 2 hours of work
+
+if [[ `dpkg --get-selections | grep p7zip-full` ]]; then echo "7zip installed" > /dev/null 2>&1; else title "Installing 7zip";apt install -y p7zip-full > /dev/null 2>&1 || error "Failed to install 7zip"; fi;
+if [[ `dpkg --get-selections | grep lxc` ]]; then echo "lxc installed"  > /dev/null 2>&1; else title "Installing LXC"; apt install -y lxc > /dev/null 2>&1 || error "Failed to install LXC"; fi;
+echo 'lxc.network.type = none' > /etc/lxc/default.conf
+
+function dump_help {
+	echo -e "\e[32m	Use:\e[0m C [ls|create|delete|start|stop|backup|restore|console] name_of_container";
+}
+function error { echo -e "\e[31m [E]: $1\e[0m"; exit; }
+function question { echo -e "\e[93m [Q]: \e[32m$1\e[0m"; }
+function error_only { echo -e "\e[31m [E]: $1\e[0m"; }
+function title { echo -e "\e[32m [I]: $1\e[0m"; }
+
+function create {
+	if [ -z "$1" ]; then error "Specify name of container"; fi;
+	title "Creating container $1";
+	template=`uname -v | awk '{print $3}'| awk '{print tolower($0)}'`;
+	lxc-create -n $1 -t $template > /dev/null 2>&1 || error "Creating contaner failed";
+	title "Created.";
+	echo '' > /var/lib/lxc/$1/rootfs/etc/network/interfaces;
+	echo "nameserver 8.8.8.8" > /var/lib/lxc/$1/rootfs/etc/resolv.conf;
+	if [ "$template" == "debian" ]; then echo  "deb http://mirror.yandex.ru/debian jessie main contrib non-free" > /var/lib/lxc/$1/rootfs/etc/apt/sources.list; fi;
+	title "Upgrading ... ";
+	chroot /var/lib/lxc/$1/rootfs apt update > /dev/null 2>&1 || error_only "Failed to update apt cache";
+	chroot /var/lib/lxc/$1/rootfs apt upgrade -y > /dev/null 2>&1 || error_only "Failed to update apt cache";
+	title "Starting ... ";
+	lxc-start -n $1 -d || error "Container start failed.";
+	lxc-attach -n $1;
+}
+
+function backup {
+	if [ -z "$1" ]; then error "Specify name of container"; fi;
+	title "Starting backup";
+	backup=/root/backup;
+	mkdir -p $backup;
+	cd /var/lib/lxc/;
+	title "Cleaning container";
+	chroot /var/lib/lxc/$1/rootfs apt-get -y autoremove > /dev/null 2>&1;
+	chroot /var/lib/lxc/$1/rootfs apt-get autoclean > /dev/null 2>&1;
+	chroot /var/lib/lxc/$1/rootfs apt-get clean > /dev/null 2>&1;
+	title "	Backup permsions";
+	getfacl -R $1/ > $1/perms || error_only "Failed to backup permissions" ;
+	title "	Files backup started";
+	7z u $backup/$1.7z $1/config $1/fstab $1/perms $1/rootfs > /dev/null 2>&1 || error "Updating backup $1 failed"
+	title "Backup finished.";
+}
+
+function restore {
+	if [ -z "$1" ]; then error "Specify name of container"; fi;
+	if [ ! -f "/root/backup/$1.7z" ]; then error "We haven\`t backup for this container"; fi;
+	title "Starting restore";
+	rm -rf /var/lib/lxc/$1 > /dev/null 2>&1;
+	cd /var/lib/lxc/;
+	7z x /root/backup/$1.7z > /dev/null 2>&1 || error_only "Failed to extract files";
+	title "Restoring permissions";
+	setfacl --restore=$1/perms > /dev/null 2>&1;
+	title "Finished restoring $1";
+}
+
+function delete {
+	if [ -z "$1" ]; then error "Specify name of container"; fi;
+	if [ ! -f /var/lib/lxc/$1 ]; then echo 1 > /dev/null; else error "Container $1 not exist"; fi;
+	title "Removing container $1";
+	lxc-stop -n $1 > /dev/null 2>&1;
+	lxc-destroy -n $1 > /dev/null 2>&1 || error "Failed to destroy container $1";
+	title "Removed.";
+}
+function start { if [ ! -f /var/lib/lxc/$1 ]; then lxc-start -d -n $1; title "$1 started" else error "Not exist $1"; fi; }
+function stop { if [ ! -f /var/lib/lxc/$1 ]; then lxc-stop -n $1; title "$1 stopped" else error "Not exist $1"; fi; }
+function console { lxc-console -n $1; }
+function ls { lxc-ls -f; }
+
+case "$1" in
+ls) ls
+;;
+create) create $2
+;;
+delete) delete $2
+;;
+backup) backup $2
+;;
+start) start $2
+;;
+stop) stop $2
+;;
+restore) restore $2
+;;
+console) console $2
+;;
+*) dump_help
+;;
+esac
+
