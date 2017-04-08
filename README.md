@@ -10,45 +10,45 @@ You can create LXC container and run this script for test. Nesting of containers
 
 	C [ls|create|delete|start|stop|backup|restore|console] name_of_container
 
-#### List
+##### List
 
 	C ls
 
 Running *lxc-ls -f* - full info about container.
 
-#### Create
+##### Create
 
 	C create name
 
 Creating container *name* like your system (if you running debian - you will have debian).
 
-#### Delete
+##### Delete
 
 	C delete name
 
 Removing container name.
 
-#### Start
+##### Start
 
 	C start name
 
-#### Stop
+##### Stop
 
 	C stop name
 
-#### Backup
+##### Backup
 
 	C backup name
 
 Backup your container "name" to */root/backup/name.7z*.
 7zip have best compression, but it will cost time.
 
-#### Restore
+##### Restore
 
 	C restore name
 
 Restoring your container from backup (/root/backup/name.7z). Removing current if exist.
 
-#### Console
+##### Console
 
 	C console name
