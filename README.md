@@ -1,4 +1,9 @@
 # C - container managment
+
+## Description
+
+This a cover for LXC. This is a compiled collection of my scripts.
+
 ## Use 
 
 	C [ls|create|delete|start|stop|backup|restore|console] name_of_container
