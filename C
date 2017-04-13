@@ -2,6 +2,11 @@
 # Eduard Generalov
 # JustForFun - 2 hours of work
 
+function error { echo -e "\e[31m [E]: $1\e[0m"; exit; }
+function question { echo -e "\e[93m [Q]: \e[32m$1\e[0m"; }
+function error_only { echo -e "\e[31m [E]: $1\e[0m"; }
+function title { echo -e "\e[32m [I]: $1\e[0m"; }
+
 if [[ `dpkg --get-selections | grep p7zip-full` ]]; then echo "7zip installed" > /dev/null 2>&1; else title "Installing 7zip";apt install -y p7zip-full > /dev/null 2>&1 || error "Failed to install 7zip"; fi;
 if [[ `dpkg --get-selections | grep lxc` ]]; then echo "lxc installed"  > /dev/null 2>&1; else title "Installing LXC"; apt install -y lxc > /dev/null 2>&1 || error "Failed to install LXC"; fi;
 echo 'lxc.network.type = none' > /etc/lxc/default.conf
@@ -9,10 +14,6 @@ echo 'lxc.network.type = none' > /etc/lxc/default.conf
 function dump_help {
 	echo -e "\e[32m	Use:\e[0m C [ls|create|delete|start|stop|backup|restore|console] name_of_container";
 }
-function error { echo -e "\e[31m [E]: $1\e[0m"; exit; }
-function question { echo -e "\e[93m [Q]: \e[32m$1\e[0m"; }
-function error_only { echo -e "\e[31m [E]: $1\e[0m"; }
-function title { echo -e "\e[32m [I]: $1\e[0m"; }
 
 function create {
 	if [ -z "$1" ]; then error "Specify name of container"; fi;
