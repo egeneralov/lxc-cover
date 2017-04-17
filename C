@@ -12,7 +12,7 @@ if [[ `dpkg --get-selections | grep lxc` ]]; then echo "lxc installed"  > /dev/n
 echo 'lxc.network.type = none' > /etc/lxc/default.conf
 
 function dump_help {
-	echo -e "\e[32m	Use:\e[0m C [ls|create|delete|start|stop|backup|restore|console] name_of_container";
+	echo -e "\e[32m	Use:\e[0m C [ls|create|delete|start|stop|attach|2|backup|restore|console] name_of_container";
 }
 
 function create {
@@ -76,6 +76,10 @@ function ls { lxc-ls -f; }
 
 case "$1" in
 ls) ls
+;;
+2) lxc-attach -n$2
+;;
+attach) lxc-attach -n $2
 ;;
 create) create $2
 ;;
