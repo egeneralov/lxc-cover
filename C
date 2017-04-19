@@ -77,7 +77,7 @@ function ls { lxc-ls -f; }
 case "$1" in
 ls) ls
 ;;
-2) lxc-attach -n$2
+2) lxc-attach -n $2
 ;;
 attach) lxc-attach -n $2
 ;;
