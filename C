@@ -35,7 +35,7 @@ function create {
 function backup {
 	if [ -z "$1" ]; then error "Specify name of container"; fi;
 	title "Starting backup";
-	backup="~/backup";
+	backup=~/backup;
 	mkdir -p $backup;
 	cd /var/lib/lxc/;
 	title "Cleaning container";
@@ -51,7 +51,7 @@ function backup {
 
 function restore {
 	if [ -z "$1" ]; then error "Specify name of container"; fi;
-	if [ ! -f "~/backup/$1.tar.gz" ]; then error "We haven\`t backup for this container"; fi;
+	if [ ! -f ~/backup/$1.tar.gz ]; then error "We haven\`t backup for this container"; fi;
 	title "Starting restore";
 	rm -rf /var/lib/lxc/$1 >> /var/log/C.log 2>&1;
 	cd /var/lib/lxc/;
