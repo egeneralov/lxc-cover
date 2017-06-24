@@ -1,5 +1,9 @@
 # C - container managment
 
+## Installation
+
+	curl https://raw.githubusercontent.com/egeneralov/lxc-cover/master/C > /sbin/C; chmod +x /sbin/C;
+
 ## Description
 
 This a cover for LXC. This is a compiled collection of my scripts.

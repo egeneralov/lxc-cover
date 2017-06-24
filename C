@@ -23,7 +23,7 @@ function create {
 	title "Created.";
 	echo '' > /var/lib/lxc/$1/rootfs/etc/network/interfaces;
 	echo "nameserver 8.8.8.8" > /var/lib/lxc/$1/rootfs/etc/resolv.conf;
-	if [ "$template" == "debian" ]; then echo  "deb http://mirror.yandex.ru/debian jessie main contrib non-free" > /var/lib/lxc/$1/rootfs/etc/apt/sources.list; fi;
+#	if [ "$template" == "debian" ]; then echo  "deb http://mirror.yandex.ru/debian jessie main contrib non-free" > /var/lib/lxc/$1/rootfs/etc/apt/sources.list; fi;
 	title "Upgrading ... ";
 	chroot /var/lib/lxc/$1/rootfs apt update >> /var/log/C.log 2>&1 || error_only "Failed to update apt cache";
 	chroot /var/lib/lxc/$1/rootfs apt upgrade -y >> /var/log/C.log 2>&1 || error_only "Failed to update apt cache";
@@ -35,7 +35,7 @@ function create {
 function backup {
 	if [ -z "$1" ]; then error "Specify name of container"; fi;
 	title "Starting backup";
-	backup=/root/backup;
+	backup="~/backup";
 	mkdir -p $backup;
 	cd /var/lib/lxc/;
 	title "Cleaning container";
@@ -45,17 +45,17 @@ function backup {
 	title "	Backup permsions";
 	getfacl -R $1/ > $1/perms || error_only "Failed to backup permissions" ;
 	title "	Files backup started";
-	7z u $backup/$1.7z $1/config $1/fstab $1/perms $1/rootfs >> /var/log/C.log 2>&1 || error "Updating backup $1 failed"
+	tar -czf $backup/$1.tar.gz $1/fstab $1/config $1/perms $1/rootfs || error "Backup for $1 failed"
 	title "Backup finished.";
 }
 
 function restore {
 	if [ -z "$1" ]; then error "Specify name of container"; fi;
-	if [ ! -f "/root/backup/$1.7z" ]; then error "We haven\`t backup for this container"; fi;
+	if [ ! -f "~/backup/$1.tar.gz" ]; then error "We haven\`t backup for this container"; fi;
 	title "Starting restore";
 	rm -rf /var/lib/lxc/$1 >> /var/log/C.log 2>&1;
 	cd /var/lib/lxc/;
-	7z x /root/backup/$1.7z >> /var/log/C.log 2>&1 || error_only "Failed to extract files";
+	tar -xzf ~/backup/$1.tar.gz >> /var/log/C.log 2>&1 || error_only "Failed to extract files";
 	title "Restoring permissions";
 	setfacl --restore=$1/perms >> /var/log/C.log 2>&1;
 	title "Finished restoring $1";
